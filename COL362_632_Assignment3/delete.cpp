@@ -49,6 +49,8 @@ int totalpage(FileHandler *fh)
 {
     PageHandler lastpage = fh->LastPage();
     int total_Pages = lastpage.GetPageNum() + 1;
+    fh->UnpinPage(total_Pages-1);
+    fh->FlushPage(total_Pages-1);
     return total_Pages;
 }
 int clean_file(FileHandler *fh)
@@ -257,7 +259,7 @@ int main(int argc, char *argv[])
             {
                 int dp = clean_file(&input);
                 total_Pages -= dp;
-                if(dp>0) cout<<"Deleted  Pages : "<<dp<<endl;
+                if(dp>0) cout<<"Deleted  Pages :  "<<dp<<endl;
             }
             catch (const std::exception &e)
             {
