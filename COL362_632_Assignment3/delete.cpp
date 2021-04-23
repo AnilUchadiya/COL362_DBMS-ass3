@@ -79,7 +79,8 @@ int clean_file(FileHandler *fh)
         {
             fh->UnpinPage(pno);
             fh->FlushPage(pno);
-            fh->DisposePage(pno);    
+            fh->DisposePage(pno);  
+            fh->FlushPages();  
             deletecount++;        
         }
         else
