@@ -162,6 +162,11 @@ int main(int argc, char *argv[])
         output.UnpinPage(currPage);
         output.FlushPage(currPage);
     }
+    else{
+      output.MarkDirty(currPage);
+      output.UnpinPage(currPage);
+      output.FlushPage(currPage);
+    }
     // int intpPage = (PAGE_SIZE / sizeof(int));
     // PageHandler ph;
     // ph = input.FirstPage();
