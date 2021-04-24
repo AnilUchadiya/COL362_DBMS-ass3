@@ -95,135 +95,6 @@ int clean_file(FileHandler *fh)
     return deletecount;
 }
 
-void swap_up(FileHandler *fh){
-    int tp = totalpage(fh);
-    if(tp = 0) return;
-    PageHandler ph ;
-    int start_page;
-    int start_offset;
-    int last_page;
-    int last_offset;
-    bool empty = false;
-    int currPage = 0;
-    int currOffset = 0;
-    int min = INT32_MIN;
-    bool eof = false;
-    for(int i=0; i<tp; i++){
-        ph = fh->PageAt(i);
-        char * data = ph.GetData();
-        for(int j =0;j<6;j++){
-            int temp;
-            memcpy(&temp,&data[j* sizeof(int)],sizeof(int));
-            if(temp == INT32_MIN && !empty){
-                start_page = i;
-                start_offset  = j;
-                empty = true;
-            }
-            if(empty && temp != INT32_MIN){
-                last_page = i;
-                last_offset = j;
-                while(last_page < tp){
-                    PageHandler start_pageh;
-                    PageHandler last_pageh;
-                    if (last_offset == PAGE_SIZE - sizeof(int))
-                    {
-                        fh->MarkDirty(last_page);
-                        fh->UnpinPage(last_page);
-                        fh->FlushPage(last_page);
-                        last_page++;
-                        last_offset = 0;
-                        if (last_page == tp){
-                            cout <<"breaked here "<<last_offset<<"  " <<start_offset<<endl;
-                            if (!eof  && start_offset == PAGE_SIZE - 2*sizeof(int))
-                            {   
-                                cout <<"inserting intmin "<<endl;
-                                start_pageh = fh->PageAt(start_page);
-                                char *data_p = start_pageh.GetData();
-                                memcpy(&data_p[start_offset], &min, sizeof(int));
-                                start_offset += sizeof(int);
-                                fh->MarkDirty(start_page);
-                                fh->UnpinPage(start_page);
-                                fh->FlushPage(start_page);
-                            }
-                            break;
-                        }
-                    }
-                    if (start_offset == PAGE_SIZE - sizeof(int))
-                    {
-                        fh->MarkDirty(start_page);
-                        fh->UnpinPage(start_page);
-                        fh->FlushPage(start_page);
-                        start_page++;
-                        start_offset = 0;
-                    }
-                    try
-                    {
-                        start_pageh = fh->PageAt(start_page);
-                    }
-                    catch (const std::exception &e)
-                    {
-                        cout << "Error opening start_pageh no : " << currPage << endl;
-                        PageHandler phl = fh->LastPage();
-                        cout << "last page of this  " << phl.GetPageNum() << endl;
-                        std::cerr << e.what() << '\n';
-                        fh->UnpinPage(tp - 1);
-                        fh->FlushPage(tp - 1);
-                    }
-                    try
-                    {
-                        last_pageh = fh->PageAt(last_page);
-                    }
-                    catch (const std::exception &e)
-                    {
-                        cout << "Error opening page_qh no : " << currPage << endl;
-                        PageHandler phl = fh->LastPage();
-                        cout << "last page of this  " << phl.GetPageNum() << endl;
-                        std::cerr << e.what() << '\n';
-                        fh->UnpinPage(tp - 1);
-                        fh->FlushPage(tp - 1);
-                    }
-                    char *data_p = start_pageh.GetData();
-                    char *data_q = last_pageh.GetData();
-
-                    int temp;
-                    memcpy(&temp, &data_q[last_offset], sizeof(int));
-                    int temp2;
-                    memcpy(&temp2, &data_p[start_offset], sizeof(int));
-                    if (temp == INT32_MIN)
-                    {
-                        eof = true;
-                        cout<<"End of file found"<<endl;
-                    }
-                    // if(temp ==0){
-                    //     printf("start_page = %d, last_page = %d start_offset = %d last_offset = %d \n",start_page,last_page,start_offset,last_offset);
-                    // }
-                    // cout << "copying " << temp << " to " << temp2 << endl;
-                    if (!eof && start_page == tp - 1 && start_offset == PAGE_SIZE - 2*sizeof(int))
-                    {
-                        cout<<"Page is completly packed eof not found"<<endl;
-                        memcpy(&data_p[start_offset], &min, sizeof(int));
-                        fh->MarkDirty(currPage);
-                        fh->UnpinPage(currPage);
-                        fh->FlushPage(currPage);
-                    }
-                    else
-                    {
-                        // cout<<"here"<<endl;
-                        memcpy(&data_p[start_offset], &data_q[last_offset], sizeof(int));
-                    }
-
-                    start_offset += sizeof(int);
-                    last_offset += sizeof(int);
-                }
-            }
-        }
-        fh->UnpinPage(i);
-        fh->FlushPage(i);
-    }
-    return;
-}
-
-
 int main(int argc, char *argv[])
 {
     FileManager fm;
@@ -299,7 +170,6 @@ int main(int argc, char *argv[])
                     input.UnpinPage(currPage);
                     input.FlushPages();
                     cout << "Found num : " << num << " pno = " << currPage << " offset = " << currOffset << endl;
-                    memcpy(&data_p[currOffset],&min, sizeof(int));
                     int page_p = currPage;
                     int offset_p = currOffset;
                     int offset_q = currOffset + sizeof(int);
@@ -309,8 +179,7 @@ int main(int argc, char *argv[])
                         page_q++;
                         offset_q = 0;
                     }
-
-                    while (false)
+                    while (page_q <= total_Pages - 1)
                     {
                         PageHandler page_ph;
                         PageHandler page_qh;
@@ -419,7 +288,6 @@ int main(int argc, char *argv[])
                     currOffset = 0;
                 }
             }
-            swap_up(&input);
             // cout << "Found num : " << num << " pno = " << currPage << " offset = " << currOffset << endl;
             try
             {
