@@ -11,7 +11,7 @@ void print_page(FileHandler *fh, int pid)
     int int_per_page = PAGE_SIZE / sizeof(int) - 1;
     PageHandler ph;
     PageHandler phl = fh->LastPage(); 
-    cout << "last page of this *ptr_fh " << phl.GetPageNum() << endl;
+    // cout << "last page of this *ptr_fh " << phl.GetPageNum() << endl;
     int lp = phl.GetPageNum();
     if(lp == -1){
         cout << " Empty file "<< endl;
@@ -64,7 +64,7 @@ int clean_file(FileHandler *fh)
     fh->FlushPage(pno);
     if(pno == -1) return 0;
     for(int pn = pno;pn>=0;pn--){
-        ph = fh->PageAt(pno);
+        ph = fh->PageAt(pn);
         char *data = ph.GetData();
         bool destroy = true;
         for(int i = 0;i<6;i++){
@@ -230,9 +230,9 @@ int main(int argc, char *argv[])
                         // {
                         //     break; 
                         // }
-                        if(temp ==0){
-                            printf("page_p = %d, page_q = %d offset_p = %d offset_q = %d \n",page_p,page_q,offset_p,offset_q);
-                        }
+                        // if(temp ==0){
+                        //     printf("page_p = %d, page_q = %d offset_p = %d offset_q = %d \n",page_p,page_q,offset_p,offset_q);
+                        // }
                         // cout << "copying " << temp << " to " << temp2 << endl;
 
                         memcpy(&data_p[offset_p], &data_q[offset_q], sizeof(int));
@@ -257,7 +257,7 @@ int main(int argc, char *argv[])
             try
             {
                 int dp = clean_file(&input);
-                total_Pages -= dp;
+                total_Pages -= dp; 
                 if(dp>0) cout<<"Deleted  Pages :  "<<dp<<endl;
             }
             catch (const std::exception &e)
@@ -273,9 +273,9 @@ int main(int argc, char *argv[])
         
         // break;
     }
-    FileHandler ans;
-    ans = fm.OpenFile("TestCases/TC_delete/output_delete");
-    for (int i = 0; i<4; i++)
+    // FileHandler ans;
+    // ans = fm.OpenFile("TestCases/TC_delete/output_delete");
+    for (int i = 0; i< totalpage(&input); i++)
     {
         print_page(&input, i);
     }
