@@ -179,8 +179,6 @@ int main(int argc, char *argv[])
     {
         input = fm.OpenFile(argv[1]);
         qfile.open(argv[2]);
-        fm.DestroyFile(argv[3]);
-        output = fm.CreateFile(argv[3]);
         // cout << "File opened : " << argv[1] << endl;
         // cout << "File Created : " << argv[3] << endl;
     }
@@ -326,7 +324,7 @@ int main(int argc, char *argv[])
                         offset_p = 0;
                         if (page_q == total_Pages)
                         {
-                            break;
+                            break;  
                         }
                     }
                     try
