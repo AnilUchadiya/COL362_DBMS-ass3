@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
     {
         fm.DestroyFile(argv[1]);
         output = fm.CreateFile(argv[1]);
-        cout << "File created : " << argv[1] << endl;
+        // cout << "File created : " << argv[1] << endl;
     }
     catch (const std::exception &e)
     {
@@ -69,6 +69,8 @@ int main(int argc, char *argv[])
     10, 10, 10, 12, 12, 12,
     12, 12
     };
+    // vector<int> vect;
+
 
     int currPage = 0;
     int currOffset = 0;
@@ -102,6 +104,10 @@ int main(int argc, char *argv[])
         output.MarkDirty(currPage);
         output.UnpinPage(currPage);
         output.FlushPage(currPage);
+    }else{
+      output.MarkDirty(currPage);
+      output.UnpinPage(currPage);
+      output.FlushPage(currPage);
     }
 
     // FileHandler ans;
