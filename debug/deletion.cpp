@@ -179,6 +179,8 @@ int main(int argc, char *argv[])
     {
         input = fm.OpenFile(argv[1]);
         qfile.open(argv[2]);
+        fm.DestroyFile(argv[3]);
+        output = fm.CreateFile(argv[3]);
         // cout << "File opened : " << argv[1] << endl;
         // cout << "File Created : " << argv[3] << endl;
     }
@@ -258,6 +260,7 @@ int main(int argc, char *argv[])
                     input.MarkDirty(currPage);
                     input.UnpinPage(currPage);
                     input.FlushPage(currPage);
+                    // cout << "mdirty -> " << currPage << endl;
                     currPage++;
                     currOffset = 0;
                 }
@@ -265,6 +268,7 @@ int main(int argc, char *argv[])
             input.MarkDirty(currPage);
             input.UnpinPage(currPage);
             input.FlushPage(currPage);
+            // cout << "mdirty -> " << currPage << endl;
             struct empty_pos ans = swap_up(&input);
             if (!ans.edited)
             {
@@ -296,6 +300,7 @@ int main(int argc, char *argv[])
                         input.MarkDirty(page_q);
                         input.UnpinPage(page_q);
                         input.FlushPage(page_q);
+                        // cout << "mdirty -> " << page_q << endl;
                         page_q++;
                         offset_q = 0;
                         if (page_q == total_Pages)
@@ -311,6 +316,7 @@ int main(int argc, char *argv[])
                                 input.MarkDirty(page_p);
                                 input.UnpinPage(page_p);
                                 input.FlushPage(page_p);
+                                // cout << "mdirty -> " << page_p << endl;
                             }
                             break;
                         }
@@ -320,11 +326,12 @@ int main(int argc, char *argv[])
                         input.MarkDirty(page_p);
                         input.UnpinPage(page_p);
                         input.FlushPage(page_p);
+                        // cout << "mdirty -> " << page_p << endl;
                         page_p++;
                         offset_p = 0;
                         if (page_q == total_Pages)
                         {
-                            break;  
+                            break;
                         }
                     }
                     try
@@ -373,9 +380,10 @@ int main(int argc, char *argv[])
                     {
                         // cout << "Page is completly packed eof not found" << endl;
                         memcpy(&data_p[offset_p], &min, sizeof(int));
-                        input.MarkDirty(page_p);
-                        input.UnpinPage(page_p);
-                        input.FlushPage(page_p);
+                        input.MarkDirty(currPage);
+                        input.UnpinPage(currPage);
+                        input.FlushPage(currPage);
+                        // cout << "mdirty -> " << currPage << endl;
                     }
                     else
                     {
@@ -390,16 +398,18 @@ int main(int argc, char *argv[])
                 input.MarkDirty(page_q);
                 input.UnpinPage(page_q);
                 input.FlushPage(page_q);
+                // cout << "mdirty -> " << page_q << endl;
                 input.MarkDirty(page_p);
                 input.UnpinPage(page_p);
                 input.FlushPage(page_p);
+                // cout << "mdirty -> " << page_p << endl;
 
                 // for (int i = 0; i < totalpage(&input); i++)
                 // {
                 //     print_page(&input, i);
                 // }
             }
-            
+
             // swap_up(&input);
             // cout << "Found num : " << num << " pno = " << currPage << " offset = " << currOffset << endl;
             try
@@ -426,13 +436,19 @@ int main(int argc, char *argv[])
 
         // break;
     }
-    input.FlushPages();
     // FileHandler ans;
     // ans = fm.OpenFile("TestCases/TC_delete/output_delete");
-    for (int i = 0; i < totalpage(&input); i++)
-    {
-        print_page(&input, i);
-    }
+    // for (int i = 0; i < totalpage(&input); i++)
+    // {
+    //     print_page(&input, i);
+    // }
+
+    // FileHandler ans;
+    // ans = fm.OpenFile(argv[1]);
+    // for (int i = 0;i<totalpage(&ans); i++)
+    // {
+    //     print_page(&ans, i);
+    // }
     // for (int i = 0; i < totalpage(&ans); i++)
     // {
     //     print_page(&ans, i);
