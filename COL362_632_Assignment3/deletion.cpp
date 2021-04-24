@@ -270,10 +270,14 @@ int main(int argc, char *argv[])
             struct empty_pos ans = swap_up(&input);
             if (!ans.edited)
             {
-                continue;
+                // continue;
             }
             else
             {
+                // for (int i = 0; i < totalpage(&input); i++)
+                // {
+                //     print_page(&input, i);
+                // }
                 page_p = ans.startp;
                 offset_p = ans.startoff * sizeof(int);
                 offset_q = ans.lastoff * sizeof(int);
@@ -288,6 +292,7 @@ int main(int argc, char *argv[])
                 {
                     PageHandler page_ph;
                     PageHandler page_qh;
+                    // cout<<"pq = "<<page_q<<"pp = "<<page_p<<endl;
                     if (offset_q == PAGE_SIZE - sizeof(int))
                     {
                         input.MarkDirty(page_q);
@@ -319,6 +324,10 @@ int main(int argc, char *argv[])
                         input.FlushPage(page_p);
                         page_p++;
                         offset_p = 0;
+                        if (page_q == total_Pages)
+                        {
+                            break;
+                        }
                     }
                     try
                     {
@@ -374,18 +383,25 @@ int main(int argc, char *argv[])
                     {
                         // cout<<"here"<<endl;
                         memcpy(&data_p[offset_p], &data_q[offset_q], sizeof(int));
+                        memcpy(&data_q[offset_q],&min, sizeof(int));
                     }
 
                     offset_p += sizeof(int);
                     offset_q += sizeof(int);
                 }
+                input.MarkDirty(page_q);
+                input.UnpinPage(page_q);
+                input.FlushPage(page_q);
+                input.MarkDirty(page_p);
+                input.UnpinPage(page_p);
+                input.FlushPage(page_p);
+
+                // for (int i = 0; i < totalpage(&input); i++)
+                // {
+                //     print_page(&input, i);
+                // }
             }
-            // input.MarkDirty(page_q);
-            // input.UnpinPage(page_q);
-            // input.FlushPage(page_q);
-            // input.MarkDirty(page_p);
-            // input.UnpinPage(page_p);
-            // input.FlushPage(page_p);
+            
             // swap_up(&input);
             // cout << "Found num : " << num << " pno = " << currPage << " offset = " << currOffset << endl;
             try
