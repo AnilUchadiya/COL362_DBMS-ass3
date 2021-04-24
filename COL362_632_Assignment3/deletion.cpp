@@ -56,6 +56,7 @@ int totalpage(FileHandler *fh)
 }
 int clean_file(FileHandler *fh)
 {
+    
     int pno = 0;
     PageHandler ph;
     int deletecount = 0;
@@ -63,8 +64,10 @@ int clean_file(FileHandler *fh)
     pno = ph.GetPageNum();
     fh->UnpinPage(pno);
     fh->FlushPage(pno);
+    cout<<"clenup iu[ = "<<pno<<endl;
     if (pno == -1)
         return 0;
+    
     for (int pn = pno; pn >= 0; pn--)
     {
         ph = fh->PageAt(pn);
@@ -79,6 +82,8 @@ int clean_file(FileHandler *fh)
                 destroy = false;
                 fh->UnpinPage(pn);
                 fh->FlushPage(pn);
+                cout<<"temp = "<<temp<<endl;
+                cout<<"clenup - "<<pn<<" *** "<<i <<deletecount<<endl;
                 return deletecount;
                 break;
             }
@@ -92,6 +97,7 @@ int clean_file(FileHandler *fh)
             deletecount++;
         }
     }
+    cout<<"clenup - " <<deletecount<<endl;
     return deletecount;
 }
 
@@ -284,7 +290,6 @@ struct empty_pos swap_up(FileHandler *fh){
                 break;
             }
         }
-        fh->MarkDirty(i);
         fh->UnpinPage(i);
         fh->FlushPage(i);
         if(empty && interval) break;
@@ -396,14 +401,18 @@ int main(int argc, char *argv[])
                     currOffset = 0;
                 }
             }
+            input.MarkDirty(currPage);
+            input.UnpinPage(currPage);
+            input.FlushPage(currPage);
             struct empty_pos ans = swap_up(&input);
             if(!ans.edited){
-                continue;
+                // continue;
             }
-            page_p = ans.startp ;
-            offset_p = ans.startoff*sizeof(int);
-            offset_q = ans.lastoff*sizeof(int);
-            page_q = ans.lastp;
+            else
+                page_p = ans.startp ;
+                offset_p = ans.startoff*sizeof(int);
+                offset_q = ans.lastoff*sizeof(int);
+                page_q = ans.lastp;
             if (currOffset == PAGE_SIZE - sizeof(int))
             {
                 page_q++;
@@ -506,9 +515,14 @@ int main(int argc, char *argv[])
                 offset_q += sizeof(int);
             }
                 
-                
+            input.MarkDirty(page_q);
+            input.UnpinPage(page_q);
+            input.FlushPage(page_q);
+            input.MarkDirty(page_p);
+            input.UnpinPage(page_p);
+            input.FlushPage(page_p);
             // swap_up(&input);
-            cout << "Found num : " << num << " pno = " << currPage << " offset = " << currOffset << endl;
+            // cout << "Found num : " << num << " pno = " << currPage << " offset = " << currOffset << endl;
             try
             {
                 int dp = clean_file(&input);
@@ -526,6 +540,12 @@ int main(int argc, char *argv[])
                 input.FlushPage(total_Pages - 1);
             }
         }
+        // for (int i = 0; i < totalpage(&input); i++)
+        // {
+        //     print_page(&input, i);
+        // }
+        
+
 
         // break;
     }
