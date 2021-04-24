@@ -72,21 +72,19 @@ int clean_file(FileHandler *fh)
             memcpy(&temp, &data[i*sizeof(int)], sizeof(int)); 
             if(temp != INT32_MIN){
                 destroy = false;
+                fh->UnpinPage(pn);
+                fh->FlushPage(pn);
+                return deletecount;
                 break;
             }
         }
         if (destroy)
         {
-            fh->UnpinPage(pno);
-            fh->FlushPage(pno);
-            fh->DisposePage(pno);  
+            fh->UnpinPage(pn);
+            fh->FlushPage(pn);
+            fh->DisposePage(pn);  
             fh->FlushPages();  
             deletecount++;        
-        }
-        else
-        {
-            fh->UnpinPage(pno);
-            fh->FlushPage(pno);
         }
     }
     return deletecount ;
@@ -124,7 +122,7 @@ int main(int argc, char *argv[])
     string q;
     int currPage = 0;
     int currOffset = 0;
-    int min = INT32_MIN;
+    int min = INT32_MIN; 
 
     int int_per_page = PAGE_SIZE / sizeof(int) - 1;
     while (qfile >> q)
@@ -281,10 +279,10 @@ int main(int argc, char *argv[])
     {
         print_page(&input, i);
     }
-    for (int i = 0;i<4; i++)
-    {
-        print_page(&ans, i);
-    }
+    // for (int i = 0;; i++)
+    // {
+    //     print_page(&ans, i);
+    // }
     cout << "okk" << endl;
 
     // cout<<i<<endl;
