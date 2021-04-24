@@ -174,18 +174,18 @@ int main(int argc, char *argv[])
     // data = ph.GetData();
     // int i=0;
     FileHandler ans;
-    // ans = fm.OpenFile("TestCases/TC_search/output_search");
-    // PageHandler lastpage = input.LastPage();
-    // total_Pages = lastpage.GetPageNum() + 1;
-    // for (int i = 0; i < total_Pages; i++)
-    // {
-    //     print_page(&input, i);
-    // }
-    // for (int i = 0;i<currPage+1; i++)
-    // {
-    //     // print_page(&ans, i);        
-    //     print_page(&output, i);
-    // }
+    ans = fm.OpenFile("TestCases/TC_search/output_search");
+    PageHandler lastpage = input.LastPage();
+    total_Pages = lastpage.GetPageNum() + 1;
+    for (int i = 0; i < total_Pages; i++)
+    {
+        print_page(&input, i);
+    }
+    for (int i = 0;i<currPage+1; i++)
+    {
+        print_page(&ans, i);        
+        print_page(&output, i);
+    }
 
     // cout<<i<<endl;
     return 0;
