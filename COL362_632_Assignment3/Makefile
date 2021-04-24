@@ -3,6 +3,8 @@ deleteobjects = buffer_manager.o file_manager.o deletion.o
 createfileobjects = buffer_manager.o file_manager.o createfile.o
 binarysearchobjects = buffer_manager.o file_manager.o binarysearch.o
 join1objects = buffer_manager.o file_manager.o join1.o
+join2objects = buffer_manager.o file_manager.o join2.o
+
 
 linearsearch : $(searchobjects)
 	     g++ -std=c++11 -o linearsearch $(searchobjects)
@@ -27,7 +29,13 @@ join1 : $(join1objects)
 
 join1.o : join1.cpp
 		g++ -std=c++11 -c join1.cpp
-		
+
+join2 : $(join2objects)
+		g++ -std=c++11 -o join2 $(join2objects)
+
+join2.o : join2.cpp
+		g++ -std=c++11 -c join2.cpp
+
 createfile : $(createfileobjects)
 	     g++ -std=c++11 -o createfile $(createfileobjects)
 
