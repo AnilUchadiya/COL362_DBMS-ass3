@@ -309,7 +309,7 @@ int main(int argc, char *argv[])
 
         // break;
     }
-    // FileHandler ans;
+    FileHandler ans;
     // ans = fm.OpenFile("TestCases/TC_delete/output_delete");
     for (int i = 0; i < totalpage(&input); i++)
     {
