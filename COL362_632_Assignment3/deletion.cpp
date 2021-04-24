@@ -380,12 +380,12 @@ int main(int argc, char *argv[])
                     offset_q += sizeof(int);
                 }
             }
-            input.MarkDirty(page_q);
-            input.UnpinPage(page_q);
-            input.FlushPage(page_q);
-            input.MarkDirty(page_p);
-            input.UnpinPage(page_p);
-            input.FlushPage(page_p);
+            // input.MarkDirty(page_q);
+            // input.UnpinPage(page_q);
+            // input.FlushPage(page_q);
+            // input.MarkDirty(page_p);
+            // input.UnpinPage(page_p);
+            // input.FlushPage(page_p);
             // swap_up(&input);
             // cout << "Found num : " << num << " pno = " << currPage << " offset = " << currOffset << endl;
             try
@@ -414,10 +414,10 @@ int main(int argc, char *argv[])
     }
     // FileHandler ans;
     // ans = fm.OpenFile("TestCases/TC_delete/output_delete");
-    // for (int i = 0; i < totalpage(&input); i++)
-    // {
-    //     print_page(&input, i);
-    // }
+    for (int i = 0; i < totalpage(&input); i++)
+    {
+        print_page(&input, i);
+    }
     // for (int i = 0; i < totalpage(&ans); i++)
     // {
     //     print_page(&ans, i);
