@@ -1,19 +1,19 @@
-searchobjects = buffer_manager.o file_manager.o search.o
-deleteobjects = buffer_manager.o file_manager.o delete.o
+searchobjects = buffer_manager.o file_manager.o linearsearch.o
+deleteobjects = buffer_manager.o file_manager.o deletion.o
 createfileobjects = buffer_manager.o file_manager.o createfile.o
 binarysearchobjects = buffer_manager.o file_manager.o binarysearch.o
 
 linearsearch : $(searchobjects)
-	     g++ -std=c++11 -o search $(searchobjects)
+	     g++ -std=c++11 -o linearsearch $(searchobjects)
 
-search.o : search.cpp
-	g++ -std=c++11 -c search.cpp
+linearsearch.o : linearsearch.cpp
+	g++ -std=c++11 -c linearsearch.cpp
 
 deletion : $(deleteobjects)
-		g++ -std=c++11 -o delete $(deleteobjects)
+		g++ -std=c++11 -o deletion $(deleteobjects)
 
-delete_run.o : delete.cpp
-	g++ -std=c++11 -c delete.cpp
+deletion.o : deletion.cpp
+	g++ -std=c++11 -c deletion.cpp
 
 binarysearch : $(binarysearchobjects)
 	     g++ -std=c++11 -o binarysearch $(binarysearchobjects)

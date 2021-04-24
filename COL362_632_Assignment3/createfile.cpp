@@ -63,11 +63,11 @@ int main(int argc, char *argv[])
     2, 3, 3, 3, 3, 3,
     3, 3, 3, 3, 3, 3,
     3, 3, 3, 3, 3, 3,
-    3, 4, 4, 4, 4, 4,
+    4, 4, 4, 4, 4, 4,
     4, 5, 6, 7, 8, 9,
     9, 10, 10, 10, 10, 10,
     10, 10, 10, 12, 12, 12,
-    12, 12
+    12, 12, 12, 12, 12, 12
     };
 
     int currPage = 0;
@@ -99,10 +99,11 @@ int main(int argc, char *argv[])
             memcpy(&data[term_offset],&min, sizeof(int));
             term_offset += sizeof(int);
         }
-        output.MarkDirty(currPage);
-        output.UnpinPage(currPage);
-        output.FlushPage(currPage);
+        
     }
+    output.MarkDirty(currPage);
+    output.UnpinPage(currPage);
+    output.FlushPage(currPage);
 
     FileHandler ans;
     ans = fm.OpenFile(argv[1]);

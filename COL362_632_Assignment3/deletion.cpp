@@ -10,11 +10,12 @@ void print_page(FileHandler *fh, int pid)
 {
     int int_per_page = PAGE_SIZE / sizeof(int) - 1;
     PageHandler ph;
-    PageHandler phl = fh->LastPage(); 
+    PageHandler phl = fh->LastPage();
     // cout << "last page of this *ptr_fh " << phl.GetPageNum() << endl;
     int lp = phl.GetPageNum();
-    if(lp == -1){
-        cout << " Empty file "<< endl;
+    if (lp == -1)
+    {
+        cout << " Empty file " << endl;
         return;
     }
     fh->UnpinPage(lp);
@@ -27,12 +28,12 @@ void print_page(FileHandler *fh, int pid)
     catch (const std::exception &e)
     {
         cout << "Error opening page no : " << pid << endl;
-        PageHandler phl = fh->LastPage(); 
+        PageHandler phl = fh->LastPage();
         cout << "last page of this *ptr_fh " << phl.GetPageNum() << endl;
         std::cerr << e.what() << '\n';
     }
     char *data;
-    data = ph.GetData(); 
+    data = ph.GetData();
     int i = 0;
     for (i = 0; i < int_per_page; i++)
     {
@@ -44,13 +45,13 @@ void print_page(FileHandler *fh, int pid)
     }
     fh->UnpinPage(pid);
     fh->FlushPage(pid);
-} 
+}
 int totalpage(FileHandler *fh)
 {
     PageHandler lastpage = fh->LastPage();
     int total_Pages = lastpage.GetPageNum() + 1;
-    fh->UnpinPage(total_Pages-1);
-    fh->FlushPage(total_Pages-1);
+    fh->UnpinPage(total_Pages - 1);
+    fh->FlushPage(total_Pages - 1);
     return total_Pages;
 }
 int clean_file(FileHandler *fh)
@@ -62,15 +63,19 @@ int clean_file(FileHandler *fh)
     pno = ph.GetPageNum();
     fh->UnpinPage(pno);
     fh->FlushPage(pno);
-    if(pno == -1) return 0;
-    for(int pn = pno;pn>=0;pn--){
+    if (pno == -1)
+        return 0;
+    for (int pn = pno; pn >= 0; pn--)
+    {
         ph = fh->PageAt(pn);
         char *data = ph.GetData();
         bool destroy = true;
-        for(int i = 0;i<6;i++){
+        for (int i = 0; i < 6; i++)
+        {
             int temp;
-            memcpy(&temp, &data[i*sizeof(int)], sizeof(int)); 
-            if(temp != INT32_MIN){
+            memcpy(&temp, &data[i * sizeof(int)], sizeof(int));
+            if (temp != INT32_MIN)
+            {
                 destroy = false;
                 fh->UnpinPage(pn);
                 fh->FlushPage(pn);
@@ -82,12 +87,12 @@ int clean_file(FileHandler *fh)
         {
             fh->UnpinPage(pn);
             fh->FlushPage(pn);
-            fh->DisposePage(pn);  
-            fh->FlushPages();  
-            deletecount++;        
+            fh->DisposePage(pn);
+            fh->FlushPages();
+            deletecount++;
         }
     }
-    return deletecount ;
+    return deletecount;
 }
 
 int main(int argc, char *argv[])
@@ -113,8 +118,8 @@ int main(int argc, char *argv[])
     }
     PageHandler lastpage = input.LastPage();
     int total_Pages = lastpage.GetPageNum() + 1;
-    input.UnpinPage(total_Pages-1);
-    input.FlushPage(total_Pages-1);
+    input.UnpinPage(total_Pages - 1);
+    input.FlushPage(total_Pages - 1);
     for (int i = 0; i < total_Pages; i++)
     {
         print_page(&input, i);
@@ -122,7 +127,7 @@ int main(int argc, char *argv[])
     string q;
     int currPage = 0;
     int currOffset = 0;
-    int min = INT32_MIN; 
+    int min = INT32_MIN;
 
     int int_per_page = PAGE_SIZE / sizeof(int) - 1;
     while (qfile >> q)
@@ -133,6 +138,7 @@ int main(int argc, char *argv[])
             int num;
             qfile >> num;
             bool deleted = false;
+            bool eof = false;
             PageHandler ph;
             PageHandler qh;
             currPage = 0;
@@ -151,20 +157,21 @@ int main(int argc, char *argv[])
                     PageHandler phl = input.LastPage();
                     cout << "last page of this *ptr_fh " << phl.GetPageNum() << endl;
                     std::cerr << e.what() << '\n';
-                    input.UnpinPage(total_Pages-1);
-                    input.FlushPage(total_Pages-1);
+                    input.UnpinPage(total_Pages - 1);
+                    input.FlushPage(total_Pages - 1);
                 }
-                char *data_p = ph.GetData(); 
+                char *data_p = ph.GetData();
                 int temp;
                 memcpy(&temp, &data_p[currOffset], sizeof(int));
-                if(temp == INT32_MIN) break;
+                if (temp == INT32_MIN)
+                    break;
                 if (temp == num)
                 {
                     input.UnpinPage(currPage);
                     input.FlushPages();
                     cout << "Found num : " << num << " pno = " << currPage << " offset = " << currOffset << endl;
                     int page_p = currPage;
-                    int offset_p = currOffset ;
+                    int offset_p = currOffset;
                     int offset_q = currOffset + sizeof(int);
                     int page_q = page_p;
                     if (currOffset == PAGE_SIZE - sizeof(int))
@@ -183,12 +190,26 @@ int main(int argc, char *argv[])
                             input.FlushPage(page_q);
                             page_q++;
                             offset_q = 0;
-                            if(page_q == total_Pages) break; 
+                            if (page_q == total_Pages){
+                                cout <<"breaked here "<<offset_q<<"  " <<offset_p<<endl;
+                                if (!eof  && offset_p == PAGE_SIZE - 2*sizeof(int))
+                                {   
+                                    cout <<"inserting intmin "<<endl;
+                                    page_ph = input.PageAt(page_p);
+                                    char *data_p = page_ph.GetData();
+                                    memcpy(&data_p[offset_p], &min, sizeof(int));
+                                    offset_p += sizeof(int);
+                                    input.MarkDirty(page_p);
+                                    input.UnpinPage(page_p);
+                                    input.FlushPage(page_p);
+                                }
+                                break;
+                            }
                         }
                         if (offset_p == PAGE_SIZE - sizeof(int))
                         {
                             input.MarkDirty(page_p);
-                            input.UnpinPage(page_p); 
+                            input.UnpinPage(page_p);
                             input.FlushPage(page_p);
                             page_p++;
                             offset_p = 0;
@@ -203,8 +224,8 @@ int main(int argc, char *argv[])
                             PageHandler phl = input.LastPage();
                             cout << "last page of this  " << phl.GetPageNum() << endl;
                             std::cerr << e.what() << '\n';
-                            input.UnpinPage(total_Pages-1);
-                            input.FlushPage(total_Pages-1);
+                            input.UnpinPage(total_Pages - 1);
+                            input.FlushPage(total_Pages - 1);
                         }
                         try
                         {
@@ -216,39 +237,53 @@ int main(int argc, char *argv[])
                             PageHandler phl = input.LastPage();
                             cout << "last page of this  " << phl.GetPageNum() << endl;
                             std::cerr << e.what() << '\n';
-                            input.UnpinPage(total_Pages-1);
-                            input.FlushPage(total_Pages-1);
+                            input.UnpinPage(total_Pages - 1);
+                            input.FlushPage(total_Pages - 1);
                         }
                         char *data_p = page_ph.GetData();
                         char *data_q = page_qh.GetData();
-                        
+
                         int temp;
                         memcpy(&temp, &data_q[offset_q], sizeof(int));
                         int temp2;
                         memcpy(&temp2, &data_p[offset_p], sizeof(int));
-                        // if (temp2 == INT32_MIN)
-                        // {
-                        //     break; 
-                        // }
+                        if (temp == INT32_MIN)
+                        {
+                            eof = true;
+                            cout<<"End of file found"<<endl;
+                        }
                         // if(temp ==0){
                         //     printf("page_p = %d, page_q = %d offset_p = %d offset_q = %d \n",page_p,page_q,offset_p,offset_q);
                         // }
                         // cout << "copying " << temp << " to " << temp2 << endl;
-
-                        memcpy(&data_p[offset_p], &data_q[offset_q], sizeof(int));
+                        if (!eof && page_p == total_Pages - 1 && offset_p == PAGE_SIZE - 2*sizeof(int))
+                        {
+                            cout<<"Page is completly packed eof not found"<<endl;
+                            memcpy(&data_p[offset_p], &min, sizeof(int));
+                            input.MarkDirty(currPage);
+                            input.UnpinPage(currPage);
+                            input.FlushPage(currPage);
+                        }
+                        else
+                        {
+                            // cout<<"here"<<endl;
+                            memcpy(&data_p[offset_p], &data_q[offset_q], sizeof(int));
+                        }
 
                         offset_p += sizeof(int);
                         offset_q += sizeof(int);
                     }
-                   
                 }
-                else {currOffset += sizeof(int);}
+                else
+                {
+                    currOffset += sizeof(int);
+                }
 
                 if (currOffset == PAGE_SIZE - sizeof(int))
                 {
                     input.MarkDirty(currPage);
                     input.UnpinPage(currPage);
-                    input.FlushPage(currPage); 
+                    input.FlushPage(currPage);
                     currPage++;
                     currOffset = 0;
                 }
@@ -257,8 +292,9 @@ int main(int argc, char *argv[])
             try
             {
                 int dp = clean_file(&input);
-                total_Pages -= dp; 
-                if(dp>0) cout<<"Deleted  Pages :  "<<dp<<endl;
+                total_Pages -= dp;
+                if (dp > 0)
+                    cout << "Deleted  Pages :  " << dp << endl;
             }
             catch (const std::exception &e)
             {
@@ -266,16 +302,16 @@ int main(int argc, char *argv[])
                 PageHandler phl = input.LastPage();
                 cout << "last page of this  " << phl.GetPageNum() << endl;
                 std::cerr << e.what() << '\n';
-                input.UnpinPage(total_Pages-1);
-                input.FlushPage(total_Pages-1); 
+                input.UnpinPage(total_Pages - 1);
+                input.FlushPage(total_Pages - 1);
             }
         }
-        
+
         // break;
     }
     // FileHandler ans;
     // ans = fm.OpenFile("TestCases/TC_delete/output_delete");
-    for (int i = 0; i< totalpage(&input); i++)
+    for (int i = 0; i < totalpage(&input); i++)
     {
         print_page(&input, i);
     }
