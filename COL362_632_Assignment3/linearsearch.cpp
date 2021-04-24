@@ -50,12 +50,12 @@ int main(int argc, char *argv[])
         qfile.open(argv[2]);
         fm.DestroyFile(argv[3]);
         output = fm.CreateFile(argv[3]);
-        cout << "File opened : " << argv[1] << endl;
-        cout << "File Created : " << argv[3] << endl;
+        // cout << "File opened : " << argv[1] << endl;
+        // cout << "File Created : " << argv[3] << endl;
     }
     catch (const std::exception &e)
     {
-        cout << "Error opening files " << endl;
+        // cout << "Error opening files " << endl;
     }
     string q;
     int currPage = -1;
@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
                         break;
                     if (temp == num)
                     {
-                        cout << "Found num : " << num << " pno = " << i << " offset = " << in << endl;
+                        // cout << "Found num : " << num << " pno = " << i << " offset = " << in << endl;
                         found = true;
                         if (currPage == -1)
                         {
@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
                             output.NewPage();
                             currOffset = 0;
                         }
-                        cout <<currOffset<<" page  = "<<currPage<<endl;
+                        // cout <<currOffset<<" page  = "<<currPage<<endl;
                         memcpy(&output_buffer[currOffset], &i, sizeof(int));
                         currOffset += sizeof(int);
                         memcpy(&output_buffer[currOffset], &in, sizeof(int));
@@ -123,7 +123,7 @@ int main(int argc, char *argv[])
 
             if (!found)
             {
-                cout << " Number not found : " << num << endl;
+                // cout << " Number not found : " << num << endl;
             }
             if (currPage == -1)
             {
@@ -177,15 +177,15 @@ int main(int argc, char *argv[])
     // ans = fm.OpenFile("TestCases/TC_search/output_search");
     // PageHandler lastpage = input.LastPage();
     // total_Pages = lastpage.GetPageNum() + 1;
-    for (int i = 0; i < total_Pages; i++)
-    {
-        print_page(&input, i);
-    }
-    for (int i = 0;i<currPage+1; i++)
-    {
-        // print_page(&ans, i);        
-        print_page(&output, i);
-    }
+    // for (int i = 0; i < total_Pages; i++)
+    // {
+    //     print_page(&input, i);
+    // }
+    // for (int i = 0;i<currPage+1; i++)
+    // {
+    //     // print_page(&ans, i);        
+    //     print_page(&output, i);
+    // }
 
     // cout<<i<<endl;
     return 0;
