@@ -83,8 +83,9 @@ int main(int argc, char *argv[])
             int findindex;
             int findpage;
             // for (int i = 0; i < total_Pages; i++)
-            while(low <= high){
-                middle = (low + high)/2;
+            while (low <= high)
+            {
+                middle = (low + high) / 2;
                 // cout << "Page requested: " <<  << endl;
                 ph = input.PageAt(middle);
                 char *data = ph.GetData();
@@ -92,15 +93,18 @@ int main(int argc, char *argv[])
                 int phigh;
                 memcpy(&plow, &data[0], sizeof(int));
 
-                for (int in = 0; in < int_per_page; in++){
+                for (int in = 0; in < int_per_page; in++)
+                {
                     int temp;
                     memcpy(&temp, &data[in * sizeof(int)], sizeof(int));
-                    if (temp == INT32_MIN){
+                    if (temp == INT32_MIN)
+                    {
                         break;
                     }
                     phigh = temp;
 
-                    if (temp == num){
+                    if (temp == num)
+                    {
                         found = true;
                         findindex = in;
                         findpage = middle;
@@ -112,27 +116,33 @@ int main(int argc, char *argv[])
                 input.FlushPage(middle);
                 if (found)
                     break;
-                if(plow < num && phigh > num){
+                if (plow < num && phigh > num)
+                {
                     break;
                 }
-                if(phigh < num){
-                  low = middle + 1;
+                if (phigh < num)
+                {
+                    low = middle + 1;
                 }
-                if(plow > num){
-                  high = middle - 1;
+                if (plow > num)
+                {
+                    high = middle - 1;
                 }
             }
             // cout << "DONE " << endl;
 
-
             if (!found)
             {
                 // cout << " Number not found : " << num << endl;
-            }else{
-              // cout << "page num: " << findpage << ", index: " << findindex << endl;
+            }
+            else
+            {
+                // cout << "page num: " << findpage << ", index: " << findindex << endl;
 
-                while(findpage > 0){
-                    if(findindex > 0 ){
+                while (findpage > 0)
+                {
+                    if (findindex > 0)
+                    {
                         break;
                     }
                     int prev = findpage - 1;
@@ -140,17 +150,20 @@ int main(int argc, char *argv[])
                     char *data = ph.GetData();
 
                     int cind = int_per_page - 1;
-                    while(cind > -1){
+                    while (cind > -1)
+                    {
                         int temp;
                         memcpy(&temp, &data[cind * sizeof(int)], sizeof(int));
 
-                        if(temp != num){
+                        if (temp != num)
+                        {
                             // cind++;
                             break;
-                        }else{
+                        }
+                        else
+                        {
                             cind--;
                         }
-
                     }
                     input.UnpinPage(prev);
                     input.FlushPage(prev);
@@ -161,14 +174,15 @@ int main(int argc, char *argv[])
                     //   cind == 0;
                     // }
 
-                    if(cind == int_per_page){
+                    if (cind == int_per_page)
+                    {
                         break;
-                    }else{
-                      findpage = prev;
-                      findindex = cind;
                     }
-
-
+                    else
+                    {
+                        findpage = prev;
+                        findindex = cind;
+                    }
                 }
 
                 // cout << "page num: " << findpage << ", index: " << findindex << endl;
@@ -176,73 +190,77 @@ int main(int argc, char *argv[])
                 // test for 2 pages of same value, check till 0 index too
 
                 // bool stp = false;
-                while(findpage < total_Pages){
+                while (findpage < total_Pages)
+                {
 
-                  ph = input.PageAt(findpage);
-                  char *data = ph.GetData();
+                    ph = input.PageAt(findpage);
+                    char *data = ph.GetData();
 
-                  while(findindex < int_per_page){
-
-                    int temp;
-                    memcpy(&temp, &data[findindex * sizeof(int)], sizeof(int));
-
-                    if(temp != num){
-                      // stp = true;
-                      break;
-                    }
-                    cout << "Found num : " << num << " pno = " << findpage << " offset = " << findindex << endl;
-
-
-                    if (currPage == -1)
+                    while (findindex < int_per_page)
                     {
-                        outPage = output.NewPage();
-                        currPage = 0;
-                    }else
-                    {
-                        outPage = output.PageAt(currPage);
+
+                        int temp;
+                        memcpy(&temp, &data[findindex * sizeof(int)], sizeof(int));
+
+                        if (temp != num)
+                        {
+                            // stp = true;
+                            break;
+                        }
+                        cout << "Found num : " << num << " pno = " << findpage << " offset = " << findindex << endl;
+
+                        if (currPage == -1)
+                        {
+                            outPage = output.NewPage();
+                            currPage = 0;
+                        }
+                        else
+                        {
+                            outPage = output.PageAt(currPage);
+                        }
+                        char *output_buffer = outPage.GetData();
+                        if (currOffset == PAGE_SIZE - sizeof(int))
+                        {
+                            output.MarkDirty(currPage);
+                            output.UnpinPage(currPage);
+                            output.FlushPage(currPage);
+                            currPage += 1;
+                            output.NewPage();
+                            currOffset = 0;
+                        }
+                        // cout <<currOffset<<" page  = "<<currPage<<endl;
+                        memcpy(&output_buffer[currOffset], &findpage, sizeof(int));
+                        currOffset += sizeof(int);
+                        memcpy(&output_buffer[currOffset], &findindex, sizeof(int));
+                        currOffset += sizeof(int);
+
+                        findindex++;
                     }
-                    char *output_buffer = outPage.GetData();
-                    if (currOffset == PAGE_SIZE - sizeof(int))
+
+                    input.UnpinPage(findpage);
+                    input.FlushPage(findpage);
+
+                    // if(stp){
+                    //   break;
+                    // }
+                    if (findindex == int_per_page)
                     {
-                        output.MarkDirty(currPage);
-                        output.UnpinPage(currPage);
-                        output.FlushPage(currPage);
-                        currPage += 1;
-                        output.NewPage();
-                        currOffset = 0;
+                        findindex = 0;
+                        findpage++;
                     }
-                    // cout <<currOffset<<" page  = "<<currPage<<endl;
-                      memcpy(&output_buffer[currOffset], &findpage, sizeof(int));
-                    currOffset += sizeof(int);
-                    memcpy(&output_buffer[currOffset], &findindex, sizeof(int));
-                    currOffset += sizeof(int);
-
-
-
-                    findindex++;
-                  }
-
-                  input.UnpinPage(findpage);
-                  input.FlushPage(findpage);
-
-                  // if(stp){
-                  //   break;
-                  // }
-                  if(findindex == int_per_page){
-                    findindex = 0;
-                    findpage++;
-                  }else{
-                    break;
-                  }
+                    else
+                    {
+                        break;
+                    }
                 }
-
             }
             if (currPage == -1)
             {
                 outPage = output.NewPage();
                 currPage = 0;
             }
-            else{
+            else
+            {
                 outPage = output.PageAt(currPage);
             }
             char *output_buffer = outPage.GetData();
@@ -259,35 +277,36 @@ int main(int argc, char *argv[])
             memcpy(&output_buffer[currOffset], &terminate, sizeof(int));
             memcpy(&output_buffer[currOffset + sizeof(int)], &terminate, sizeof(int));
             currOffset += 2 * sizeof(int);
-
-
         }
-
     }
 
-    if(currOffset != PAGE_SIZE - sizeof(int)){
+    if (currOffset != PAGE_SIZE - sizeof(int))
+    {
         PageHandler term;
         term = output.LastPage();
-        char * data = term.GetData();
-        int term_offset = currOffset ;
+        char *data = term.GetData();
+        int term_offset = currOffset;
         int min = INT32_MIN;
-        while(term_offset != PAGE_SIZE - sizeof(int)){
-            memcpy(&data[term_offset],&min, sizeof(int));
+        while (term_offset != PAGE_SIZE - sizeof(int))
+        {
+            memcpy(&data[term_offset], &min, sizeof(int));
             term_offset += sizeof(int);
         }
         output.MarkDirty(currPage);
         output.UnpinPage(currPage);
         output.FlushPage(currPage);
-    }else{
-      output.MarkDirty(currPage);
-      output.UnpinPage(currPage);
-      output.FlushPage(currPage);
+    }
+    else
+    {
+        output.MarkDirty(currPage);
+        output.UnpinPage(currPage);
+        output.FlushPage(currPage);
     }
 
     FileHandler ans;
     ans = fm.OpenFile(argv[3]);
-    std::cout << "numpages " << currPage+1 << '\n';
-    for (int i = 0;i<currPage+1; i++)
+    std::cout << "numpages " << currPage + 1 << '\n';
+    for (int i = 0; i < currPage + 1; i++)
     {
         print_page(&ans, i);
         // print_page(&output, i);

@@ -40,6 +40,7 @@ int main(int argc, char *argv[]){
     ifstream rfile1;
     ifstream rfile2;
     int min =INT32_MIN;
+    int pinnedPage =1;
     
     try{
         r1 = fm.OpenFile(argv[1]);
@@ -63,7 +64,7 @@ int main(int argc, char *argv[]){
     int r2Pages = r2.LastPage().GetPageNum() + 1;
     r2.UnpinPage(r2Pages-1);
     r2.FlushPage(r2Pages-1);
-
+    
     int currOutputPage = -1;
     int currOutputPageOffset = 0;
 
@@ -76,9 +77,11 @@ int main(int argc, char *argv[]){
 
     for(int i = 0; i < r1Pages; i++){
         ph1 = r1.PageAt(i);
+        pinnedPage +=1;
         char *datar1 = ph1.GetData();
         for(int ii = 0; ii < r2Pages; ii++){
             ph2 = r2.PageAt(ii);
+            pinnedPage +=1;
             char *datar2 = ph2.GetData(); 
             for(int ip = 0; ip < int_per_page; ip++){
                 int pg1Num;
@@ -89,6 +92,7 @@ int main(int argc, char *argv[]){
                 else{
                     for(int iip = 0; iip < int_per_page; iip++){
                         int pg2Num;
+                        cout <<"pinned page = "<<pinnedPage<<endl;
                         memcpy(&pg2Num, &datar2[iip*sizeof(int)],sizeof(int));
                         if(pg2Num == INT32_MIN){
                             break;
@@ -98,10 +102,12 @@ int main(int argc, char *argv[]){
                             cout << i << "."<< ip << " - " << ii <<"."<<iip << endl;
                             if(currOutputPage == -1){
                                 outPage = output.NewPage();
+                                // pinnedPage +=1;
                                 currOutputPage = 0;
                             }
                             else{
                                 outPage = output.PageAt(currOutputPage);
+                                // pinnedPage+=1;
                             }
 
                             char *output_buffer = outPage.GetData();
@@ -109,9 +115,11 @@ int main(int argc, char *argv[]){
                                 output.MarkDirty(currOutputPage);
                                 output.UnpinPage(currOutputPage);
                                 output.FlushPage(currOutputPage);
+                                // pinnedPage -=1;
                                 currOutputPage += 1;
                                 currOutputPageOffset = 0;
                                 output.NewPage();
+                                // pinnedPage +=1;
                             }
                             // cout << currOutputPageOffset << " Page: "<<currOutputPage << endl;
                             memcpy(&output_buffer[currOutputPageOffset], &pg1Num, sizeof(int));
@@ -123,11 +131,15 @@ int main(int argc, char *argv[]){
                 }
                 
             }
-            r2.UnpinPage(ii);
-            r2.FlushPage(ii);
+            if(pinnedPage == BUFFER_SIZE ){
+                r2.UnpinPage(ii);
+                r2.FlushPage(ii);
+                pinnedPage -=1;
+            }
         }
         r1.UnpinPage(i);
         r1.FlushPage(i);
+        pinnedPage -=1;
     }
     outPage = output.PageAt(currOutputPage);
     char *output_buffer = outPage.GetData();
@@ -138,10 +150,13 @@ int main(int argc, char *argv[]){
     output.MarkDirty(currOutputPage);
     output.UnpinPage(currOutputPage);
     output.FlushPage(currOutputPage);
-
-    for(int i=0;i<currOutputPage;i++){
+    FileHandler ans;
+    ans = fm.OpenFile("TestCases/TC_join1/output_join1");
+    for(int i=0;;i++){
         print_page(&output,i);
+        print_page(&ans, i);
     }
+    
 
 }
 
